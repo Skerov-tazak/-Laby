@@ -97,10 +97,6 @@ zbior_ary suma(zbior_ary A, zbior_ary B)
 	int i = 0;
 	int A_index = 0;
 	int B_index = 0;
-	printf("I will merge:\n");
-	printAry(A);
-	printAry(B);
-	printf("\n");
 	
 	if(mod(A.sets[0]) == mod(B.sets[0])) // Initialise the first interval
 	{
@@ -130,8 +126,6 @@ zbior_ary suma(zbior_ary A, zbior_ary B)
 
 	while(A_index < A.size || B_index < B.size) // zipper merge intervals if the same q
 	{
-		printf("i is currenlty: %d, A is %d, B is %d", i, A_index, B_index);
-		printAry(sum);
 		if(A_index < A.size && B_index < B.size && mod(A.sets[A_index]) == mod(B.sets[B_index]))
 		{
 			if(A.sets[A_index] < B.sets[B_index])
@@ -151,7 +145,7 @@ zbior_ary suma(zbior_ary A, zbior_ary B)
 			}
 			else if(B.sets[B_index] < A.sets[A_index])
 			{	
-				if(B.sets[A_index] <= sum.sets[i + 1] + Q)
+				if(mod(B.sets[B_index]) == mod(sum.sets[i]) && B.sets[B_index] <= sum.sets[i + 1] + Q)
 				{
 					mergeOverlapIntervals(sum.sets, i, B.sets, B_index);
 					B_index += 2;
@@ -424,9 +418,9 @@ void printAry(zbior_ary A)
 	printf("{ ");
 	for(int i = 0; i < A.size - 2; i += 2)
 	{
-		printf("%d-%d, ", A.sets[i], A.sets[i + 1]);
+		printf("%d %d, ", A.sets[i], A.sets[i + 1]);
 	}
-	printf("%d-%d }\n", A.sets[A.size - 2], A.sets[A.size - 1]);
+	printf("%d %d }\n", A.sets[A.size - 2], A.sets[A.size - 1]);
 }
 
 
@@ -438,16 +432,20 @@ int main()
 	test2 = ciag_arytmetyczny(48, 5, 68);
 	test3 = ciag_arytmetyczny(120, 5, 180);
 	test = suma(test, ciag_arytmetyczny(23, 5, 48));
-	printAry(test);
 	test1 = suma(test1, suma(test2, test3));
-	printAry(test1);
 	test = roznica(test, test1);
-	printf("offical: ");
-	printAry(test);
-	
-	for(int i = 45; i < 159; i++)
+
+	for(int i = -5; i < 0; i++)
 	{
-		test = suma(test,ciag_arytmetyczny(i, 5, i * 25 + i));
-		printAry(test);
+		test = suma(test, ciag_arytmetyczny(25 * i + i, 5, i));
 	}
+	for(int i = 0; i < 15; i++)
+	{
+		test = suma(test, ciag_arytmetyczny(i, 5, 25 * i + i));
+	}
+	zbior_ary testie = suma(ciag_arytmetyczny(-15, 5, -10), ciag_arytmetyczny(0, 5, 25));
+
+
+	zbior_ary intersection = roznica(test, testie);
+	printAry(intersection);
 }
