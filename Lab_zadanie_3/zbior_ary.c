@@ -1,14 +1,66 @@
 #include"zbior_ary.h"
+#include <stdio.h>
 
 static int Q;
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
-// ADD SINGLETON FUNCTIONALITY TO ALL FUNCTIONS
-// TEST THE FUNCTIONS AND WEED OUT THE EDGE CASES
-// CHECK THE TIME COMPLEXITY 
+int mod(int a)
+{
+	return (a % Q + Q) % Q;
+}
 
 void printAry(zbior_ary);
+
+void addNewIntervalwMem(zbior_ary* add_to, int start, int end)
+{
+	if(add_to->size == 0)
+	{
+		add_to->size += 2;
+		add_to->sets = (int*)malloc(sizeof(int) * (unsigned long)(add_to->size));
+		if(add_to->sets != NULL){	
+			add_to->sets[add_to->size - 2] = start;
+			add_to->sets[add_to->size - 1] = end;
+		}
+	}
+	else
+	{
+		add_to->size += 2;
+		int* temp = (int*)realloc(add_to->sets, sizeof(int) * (unsigned long)(add_to->size));
+		if(temp != NULL){	
+			temp[add_to->size - 2] = start;
+			temp[add_to->size - 1] = end;
+			add_to->sets = temp;
+		}
+	}
+}
+
+void removeLastEntry(zbior_ary* to_remove)
+{
+	if(to_remove->size == 0)
+		return;
+	if(to_remove->size == 2)
+	{
+		free(to_remove->sets);
+		to_remove->size = 0;
+	}
+	else 
+	{
+		to_remove->size -= 2;
+		to_remove->sets = (int*)realloc(to_remove->sets, (unsigned long)to_remove->size);
+	}
+}
+
+void addNewInterval(int* add_to, int to_index, int* add_from, int from_index)
+{
+	add_to[to_index] = add_from[from_index];
+	add_to[to_index + 1] = add_from[from_index + 1];
+}
+
+void mergeOverlapIntervals(int* merge_at, int at_index, int* merge_with, int with_index)
+{
+	merge_at[at_index + 1] = max(merge_at[at_index + 1], merge_with[with_index + 1]);
+}
 
 zbior_ary ciag_arytmetyczny(int a, int q, int b)
 {
@@ -34,150 +86,143 @@ zbior_ary singleton(int a)
 
 zbior_ary suma(zbior_ary A, zbior_ary B)
 {
+	if(A.size == 0)
+		return B;
+	if(B.size == 0)
+		return A;
+
 	zbior_ary sum;
-	sum.size = A.size + B.size;
-	printf("%d\n", sum.size);
-	sum.sets = (int*)calloc((size_t)sum.size,sizeof(int));
+	sum.sets = (int*)calloc((unsigned long)(A.size + B.size), sizeof(int));
+	sum.size = 0;
 	int i = 0;
 	int A_index = 0;
 	int B_index = 0;
-
-	printf("to sum:\n");
+	printf("I will merge:\n");
 	printAry(A);
 	printAry(B);
 	printf("\n");
-	printAry(sum);
-	while(A_index < A.size && B_index < B.size) // both havent ended
+	
+	if(mod(A.sets[0]) == mod(B.sets[0])) // Initialise the first interval
 	{
-		if(A.sets[A_index] % Q == B.sets[B_index] % Q) // same remainder
+		if(A.sets[0] < B.sets[0])
 		{
-			int interval_begin = max(A.sets[A_index], B.sets[B_index]);
-			int interval_end = min(A.sets[A_index + 1], B.sets[B_index + 1]);
-
-			if(interval_begin <= interval_end)
-			{
-				if(sum.sets[i + 1] == 0)
-				{
-					sum.sets[i] = min(A.sets[A_index],B.sets[B_index]);	
-					sum.sets[1 + i] = max(A.sets[A_index + 1],B.sets[B_index + 1]);
-				}
-				else 
-				{
-					sum.sets[i + 1] = max(max(A.sets[A_index + 1], B.sets[B_index + 1]), sum.sets[i + 1]); 
-				}
-
-				if(A.sets[A_index + 1] < B.sets[B_index + 1])
-				{
-					A_index += 2;
-					if(A_index >= A.size)
-					{
-						i += 2;
-						B_index += 2;
-					}
-				}
-				else 
-				{
-					B_index += 2;
-					if(B_index >= B.size)
-					{
-						i += 2;
-						A_index += 2;
-					}
-				}
-			}
-			else if(A.sets[A_index + 1] < B.sets[B_index]) 
-			{
-				if(A.sets[A_index + 1] + Q == B.sets[B_index])
-				{
-					if(sum.sets[i] == 0)
-						sum.sets[i] = A.sets[A_index];
-
-					sum.sets[i + 1] = B.sets[B_index + 1];
-					A_index += 2;
-					if(A_index >= A.size)
-					{
-						i += 2;
-						B_index += 2;
-					}
-				}
-				else 
-				{
- 					sum.sets[i] = A.sets[A_index];
-					sum.sets[i + 1] = A.sets[A_index + 1];
-					i += 2;
-					A_index += 2;
-				}
-
-			}
-			else
-			{
-				if(B.sets[B_index + 1] + Q == A.sets[A_index])
-				{
-					if(sum.sets[i] == 0)
-						sum.sets[i] = B.sets[B_index];
-				
-					sum.sets[i + 1] = A.sets[A_index + 1];
-					B_index += 2;
-					if(B_index >= B.size)
-					{
-						A_index += 2;
-						i += 2;
-					}
-				}
-				else 
-				{
-					sum.sets[i] = B.sets[B_index];
-					sum.sets[i + 1] = B.sets[B_index + 1];
-					i += 2;
-					B_index += 2;
-				}
-			}
-		}
-		else if(A.sets[A_index] % Q < B.sets[B_index] % Q)
-		{
-			sum.sets[i] = A.sets[A_index];
-			sum.sets[i + 1] = A.sets[A_index + 1];
-			i += 2;
+			addNewInterval(sum.sets, 0, A.sets, 0);
 			A_index += 2;
 		}
-		else 
+		else
 		{
-			sum.sets[i] = B.sets[B_index];
-			sum.sets[i + 1] = B.sets[B_index + 1];
-			i += 2;
+			addNewInterval(sum.sets, 0, B.sets, 0);
 			B_index += 2;
 		}
-		printAry(sum);
 	}
-	printf("heer");
-	while(A_index < A.size)
-	{
-		printAry(sum);
-		sum.sets[i] = A.sets[A_index];
-		sum.sets[i + 1] = A.sets[A_index + 1];
-		i += 2;
+	else if(mod(A.sets[0]) < mod(B.sets[0]))
+	{	
+		addNewInterval(sum.sets, 0, A.sets, 0);
 		A_index += 2;
 	}
-	
-	while(B_index < B.size)
+	else 
 	{
-		printAry(sum);
-		sum.sets[i] = B.sets[B_index];
-		sum.sets[i + 1] = B.sets[B_index + 1];
-		i += 2;
+		addNewInterval(sum.sets, 0, B.sets, 0);
 		B_index += 2;
 	}
+	sum.size = 2;
+	
 
-	printAry(sum);
-	printf("%d", i);
-	int* temp = (int*)malloc(sizeof(int) * ((size_t)i));
-	if(temp != NULL)
+	while(A_index < A.size || B_index < B.size) // zipper merge intervals if the same q
 	{
-		memcpy(temp,sum.sets, ((size_t)i) * sizeof(int));
-		free(sum.sets);
-		sum.sets = temp;
+		printf("i is currenlty: %d, A is %d, B is %d", i, A_index, B_index);
+		printAry(sum);
+		if(A_index < A.size && B_index < B.size && mod(A.sets[A_index]) == mod(B.sets[B_index]))
+		{
+			if(A.sets[A_index] < B.sets[B_index])
+			{
+				if(mod(A.sets[A_index]) == mod(sum.sets[i]) && A.sets[A_index] <= sum.sets[i + 1] + Q)
+				{
+					mergeOverlapIntervals(sum.sets, i, A.sets, A_index);
+					A_index += 2;
+				}
+				else 
+				{
+					i += 2;
+					addNewInterval(sum.sets, i, A.sets, A_index);
+					sum.size += 2;
+					A_index += 2;
+				}
+			}
+			else if(B.sets[B_index] < A.sets[A_index])
+			{	
+				if(B.sets[A_index] <= sum.sets[i + 1] + Q)
+				{
+					mergeOverlapIntervals(sum.sets, i, B.sets, B_index);
+					B_index += 2;
+				}
+				else 
+				{
+					i += 2;
+					addNewInterval(sum.sets, i, B.sets, B_index);
+					sum.size += 2;
+					B_index += 2;
+				}
+
+			}
+		}
+		else if(A_index < A.size && (B_index >= B.size || mod(A.sets[A_index]) < mod(B.sets[B_index])))
+		{
+			if(mod(A.sets[A_index]) == mod(sum.sets[i]))
+			{
+				if(A.sets[A_index] <= sum.sets[i + 1] + Q)
+				{
+					mergeOverlapIntervals(sum.sets, i, A.sets, A_index);
+					A_index += 2;
+				}
+				else 
+				{
+					i += 2;
+					addNewInterval(sum.sets, i, A.sets, A_index);
+					sum.size += 2;
+					A_index += 2;
+				}
+
+			}
+			else 
+			{	
+				i += 2;
+				addNewInterval(sum.sets, i, A.sets, A_index);
+				sum.size += 2;
+				A_index += 2;
+			}
+		}
+		else if(A_index >= A.size || mod(B.sets[B_index]) < mod(A.sets[A_index]))
+		{
+			if(mod(B.sets[B_index]) == mod(sum.sets[i]))
+			{
+				if(B.sets[B_index] <= sum.sets[i + 1] + Q)
+				{
+					mergeOverlapIntervals(sum.sets, i, B.sets, B_index);
+					B_index += 2;
+				}
+				else 
+				{
+					i += 2;
+					addNewInterval(sum.sets, i, B.sets, B_index);
+					sum.size += 2;
+					B_index += 2;
+				}
+
+			}
+			else 
+			{	
+				i += 2;
+				addNewInterval(sum.sets, i, B.sets, B_index);
+				sum.size += 2;
+				B_index += 2;
+			}
+		}
 	}
-	sum.size = i;
+
+	int* new_array = (int*)realloc(sum.sets, (unsigned long)(sum.size) * sizeof(int));
+	if(new_array != NULL)
+		sum.sets = new_array;
 	return sum;
 }
 
@@ -185,32 +230,34 @@ zbior_ary iloczyn(zbior_ary A, zbior_ary B)
 {
 	zbior_ary intersection;
 	intersection.size = 0;
+	intersection.sets = (int*)malloc(sizeof(int) * 2); // I dunno why but prevents segfault on realloc
 	int A_index = 0;
 	int B_index = 0;
 
 	while(A_index < A.size && B_index < B.size)
 	{
-		if(A.sets[A_index] % Q == B.sets[B_index] % Q)
+		if(mod(A.sets[A_index]) == mod(B.sets[B_index]))
 		{
 			int intersect_begin = max(A.sets[A_index], B.sets[B_index]);
 			int intersect_end = min(A.sets[A_index + 1], B.sets[B_index + 1]);
 
 			if(intersect_begin < intersect_end)
 			{
-				int* new_array = (int*)realloc(intersection.sets, sizeof(int) * (unsigned long long)(intersection.size + 2));
+				int* new_array = (int*)realloc(intersection.sets, sizeof(int) * (unsigned long)(intersection.size + 2));
 				if(new_array != NULL)
 					intersection.sets = new_array;
 
-				intersection.sets = new_array;
 				intersection.sets[intersection.size] = intersect_begin;
 				intersection.sets[intersection.size + 1] = intersect_end;
 				intersection.size += 2;
 			}
 
-			B_index += 2;
-			A_index += 2;
+			if(A.sets[A_index + 1] < B.sets[B_index + 1])
+				A_index += 2;
+			else
+				B_index += 2;
 		}
-		else if(A.sets[A_index] % Q > B.sets[B_index] % Q)
+		else if(mod(A.sets[A_index]) > mod(B.sets[B_index]))
 		{
 			B_index += 2;
 		}
@@ -222,116 +269,101 @@ zbior_ary iloczyn(zbior_ary A, zbior_ary B)
 	return intersection;
 }
 
+
 zbior_ary roznica(zbior_ary A, zbior_ary B)
 {
 	zbior_ary difference; 
 	difference.size = 0;
+	if(A.size == 0)
+		return difference; 
 
+	addNewIntervalwMem(&difference, A.sets[0], A.sets[1]);
+	
 	int A_index = 0;
 	int B_index = 0; 
-	int i = 0;
 	
-	while(A_index < A.size)
-	{
-		if(B_index >= B.size)
+	while(B_index < B.size)
+	{	
+		printAry(difference);
+
+		if(mod(difference.sets[difference.size - 2]) == mod(B.sets[B_index]))
 		{
-			int* temp = (int*)realloc(difference.sets, sizeof(int) * (unsigned long long)(difference.size + A.size - A_index));
-			if(temp != NULL)
-				difference.sets = temp;
-			memcpy(A.sets + A_index, difference.sets + i, (size_t)(A.size - A_index));
-			i = i + A.size - A_index;
-			A_index = A.size;
-		}
-		else if(A.sets[A_index] % Q == B.sets[B_index] % Q)
-		{
+			int intersect_begin = max(B.sets[B_index], difference.sets[difference.size - 2]);
+			int intersect_end = min(B.sets[B_index + 1], difference.sets[difference.size - 1]);
 
-			int intersect_begin = max(A.sets[A_index], B.sets[B_index]);
-			int intersect_end = min(A.sets[A_index + 1], B.sets[B_index + 1]);
-
-			if(intersect_begin < intersect_end)
-			{	
-				if(A.sets[A_index] < intersect_begin && intersect_end < A.sets[A_index + 1])	
-				{
-					int* temp = (int*)realloc(difference.sets, sizeof(int) * (unsigned long long)(difference.size + 4));
-					if(temp != NULL)
-						difference.sets = temp;
-					difference.sets[i] = A.sets[A_index];
-					difference.sets[i + 1] = intersect_begin;
-					difference.sets[i + 2] = intersect_end;
-					difference.sets[i + 3] = A.sets[A_index + 1];
-
-					i += 4;
-					B_index += 2;
-				}
-				else if(intersect_begin < A.sets[A_index] && A.sets[A_index + 1] < intersect_end)
-				{
-					A_index += 2;
-				}
-				else if(A.sets[A_index] < intersect_begin)
-				{	
-					int* temp = (int*)realloc(difference.sets, sizeof(int) * (unsigned long long)(difference.size + 2));
-					if(temp != NULL)
-						difference.sets = temp;
-					difference.sets[i] = A.sets[A_index];
-					difference.sets[i + 1] = intersect_begin;
-
-					i += 2;
-					A_index += 2;
-				}
-				else 
-				{
-					int* temp = (int*)realloc(difference.sets, sizeof(int) * (unsigned long long)(difference.size + 2));
-					if(temp != NULL)
-						difference.sets = temp;
-					difference.sets[i] = intersect_end;
-					difference.sets[i + 1] = A.sets[A_index + 1];
-				
-					i += 2;
-					B_index += 2;
-				}
-			}	
-			else 
+			if(intersect_begin <= intersect_end)
 			{
-				if(A.sets[A_index] < B.sets[B_index])
+				if(difference.sets[difference.size - 2] == intersect_begin && difference.sets[difference.size - 1] == intersect_end)
 				{
+					A_index += 2;
+					if(A_index >= A.size)
+					{
+						removeLastEntry(&difference);
+						break;
+					}
 
-					if(difference.sets[i - 1] == A.sets[A_index + 1])
-					{
-						A_index += 2;
-					}
-					else
-					{
-						int* temp = (int*)realloc(difference.sets, sizeof(int) * (unsigned long long)(difference.size + 2));
-						if(temp != NULL)
-							difference.sets = temp;
-						difference.sets[i] = A.sets[A_index];
-						difference.sets[i  + 1] = A.sets[A_index + 1];
-						A_index += 2;
-						i += 2;
-					}
+					difference.sets[difference.size - 1] = A.sets[A_index];
+					difference.sets[difference.size - 2] = A.sets[A_index + 1];
+
+				}
+				else if(difference.sets[difference.size - 2] < intersect_begin && intersect_end < difference.sets[difference.size - 1])
+				{
+					addNewIntervalwMem(&difference, intersect_end + Q, difference.sets[difference.size - 1]);
+					difference.sets[difference.size - 3] = intersect_begin - Q;
+				}	
+				else if(difference.sets[difference.size - 2] < intersect_begin)
+				{
+					difference.sets[difference.size - 1] = intersect_begin - Q;
+					A_index += 2;
+					if(A_index >= A.size)
+						break;
+					addNewIntervalwMem(&difference, A.sets[A_index], A.sets[A_index + 1]);
 				}
 				else 
 				{
+					difference.sets[difference.size - 2] = intersect_end + Q;
 					B_index += 2;
 				}
 			}
+			else 
+			{
+				if(B.sets[B_index] < difference.sets[difference.size - 2])
+				{
+					B_index += 2;
+				}
+				else 
+				{
+					A_index += 2;
+					if(A_index >= A.size)
+						break;
+					addNewIntervalwMem(&difference, A.sets[A_index], A.sets[A_index + 1]);
+				}
+			}
 		}
-		else if(A.sets[A_index] % Q < B.sets[B_index] % Q)
+		else if(mod(difference.sets[difference.size - 2]) < mod(B.sets[B_index]))
 		{
-			int* temp = (int*)realloc(difference.sets, sizeof(int) * (unsigned long long)(difference.size + 2));
-			if(temp != NULL)
-				difference.sets = temp;
-			difference.sets[i] = A.sets[A_index];
-			difference.sets[i  + 1] = A.sets[A_index + 1];
 			A_index += 2;
-			i += 2;
+			if(A_index >= A.size)
+				break;
+			addNewIntervalwMem(&difference, A.sets[A_index], A.sets[A_index + 1]);
 		}
 		else 
 		{
 			B_index += 2;
 		}
 	}
-	difference.size = i;
+	
+	if(A_index < A.size)
+	{
+		int* temp = (int*)realloc(difference.sets, sizeof(int) *  (unsigned long)(difference.size + A.size - A_index));
+		if(temp != NULL)
+		{
+			difference.sets = temp;
+			memcpy(difference.sets + difference.size, A.sets, (unsigned long)A.size);
+			difference.size += (A.size - A_index);
+		}
+	}
+
 	return difference;
 }
 
@@ -339,63 +371,49 @@ bool nalezy(zbior_ary A, int b)
 {
 	if(A.size == 0)
 		return false;
-	else if (A.size == 1) 
-	{
-		if(b == A.sets[0])
-			return true;
-		else
-			return false;
-	}
-
 	int low = 0;
 	int high = A.size - 1;
 
-
-	while(low < high)
+	while(low + 1 < high)
 	{
 		int guess = (low + high)/2;
 		
-		if(A.sets[guess] % Q == b % Q)
+		if(mod(A.sets[guess]) == mod(b))
 		{
-			if(b < guess)
-				high = guess;
+			if(b < A.sets[guess])
+				high = guess - 1;
 			else
 				low = guess;
 		}
-		else if(A.sets[guess] % Q < b % Q)
+		else if(mod(A.sets[guess]) < mod(b))
 		{
 			low = guess;
 		}
 		else
-			high = guess;
+			high = guess - 1;
 	}
-	if(low % 2 == 1)
-		return false;
-	else 
+	if(mod(b) == mod(A.sets[low]) && A.sets[low] <= b && b <= A.sets[high])
 		return true;
+	else
+		return false;
 }
 
 unsigned moc(zbior_ary A)
 {
 	if(A.size == 0)
 		return 0;
-	if(A.size == 1)
-		return 1;
 
 	unsigned int cardinality = 0;
-	for(int i = 0; i < A.size - 1; i++)
+	for(int i = 0; i < A.size; i += 2)
 	{
-		cardinality += (unsigned int)(1 + (A.sets[i + 1] - A.sets[i]) / Q);
+		cardinality += (unsigned int)(1 + ((A.sets[i + 1] - A.sets[i]) / Q));
 	}
 	return cardinality;
 }
 
 unsigned ary(zbior_ary A)
 {
-	if(A.size == 1)
-		return 1;
-	else 
-		return (unsigned)(A.size / 2);  
+	return (unsigned)(A.size / 2);  
 }
 
 void printAry(zbior_ary A)
@@ -406,21 +424,30 @@ void printAry(zbior_ary A)
 	printf("{ ");
 	for(int i = 0; i < A.size - 2; i += 2)
 	{
-		printf("%d %d, ", A.sets[i], A.sets[i + 1]);
+		printf("%d-%d, ", A.sets[i], A.sets[i + 1]);
 	}
-	printf("%d %d }\n", A.sets[A.size - 2], A.sets[A.size - 1]);
+	printf("%d-%d }\n", A.sets[A.size - 2], A.sets[A.size - 1]);
 }
 
 
 int main()
 {
-	zbior_ary test = ciag_arytmetyczny(20, 5, 35);
-	test = suma(test, ciag_arytmetyczny(45, 5, 50));
-	test = suma(test, ciag_arytmetyczny(25, 5, 65));
-	test = suma(test, ciag_arytmetyczny(37, 5, 47));
-	test = suma(test, singleton(15));
-	test = suma(test, singleton(70));
-	printf("offical: ");
-
+	zbior_ary test = ciag_arytmetyczny(20, 5, 185);
+	zbior_ary test1,test2,test3;
+	test1 = ciag_arytmetyczny(15, 5, 25);
+	test2 = ciag_arytmetyczny(48, 5, 68);
+	test3 = ciag_arytmetyczny(120, 5, 180);
+	test = suma(test, ciag_arytmetyczny(23, 5, 48));
 	printAry(test);
+	test1 = suma(test1, suma(test2, test3));
+	printAry(test1);
+	test = roznica(test, test1);
+	printf("offical: ");
+	printAry(test);
+	
+	for(int i = 45; i < 159; i++)
+	{
+		test = suma(test,ciag_arytmetyczny(i, 5, i * 25 + i));
+		printAry(test);
+	}
 }
