@@ -295,6 +295,7 @@ zbior_ary roznica(zbior_ary A, zbior_ary B)
 					A_index += 2;
 					if(A_index >= A.size)
 					{
+						printf("got here n");
 						removeLastEntry(&difference);
 						break;
 					}
