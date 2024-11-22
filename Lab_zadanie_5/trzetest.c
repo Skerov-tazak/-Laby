@@ -6,8 +6,8 @@
 #include <stdbool.h>
 #define max(x,y) ((x) > (y) ? (x) : (y))
 #define min(x,y) ((x) < (y) ? (x) : (y))
-// SIECI MOŻE BYĆ MNIEJ NIŻ 3!!!
-// LONG LONG TO INT
+#define debug(x) printf("We are in function %s\n", x); fflush(stdout)
+
 
 long long N;
 long long IDs[1000000];
@@ -62,7 +62,6 @@ long long findMinDistance()
 	}
 	return found_min;
 }
-//FIX THIS
 
 void findLastThree(long long last_three[])
 {
@@ -97,24 +96,37 @@ void findFirstThree(long long first_three[])
 
 long long binFindMiddle(long long low, long long high)
 {
-	long long target = distances[low] + (distances[high] - distances[low])/2;
+	debug("binFindMiddle");
+	long long target = distances[low] + ((distances[high] - distances[low]) + 1)/2;
+	printf("find between %lld[%lld] %lld[%lld]\n", distances[low], IDs[low], distances[high], IDs[high]);	
 
 	while(low < high)
 	{
 		long long mid = low + (high - low)/2;
 
-		if(distances[mid] == target)
+		if(distances[mid] == target){
+			printf("TARGET IN SET: %lld\n", target);
 			return mid;
+
+		}
 		else if(distances[mid] < target)
 			low = mid + 1;
 		else
 			high = mid;
 	}
 
+
+
 	if(distance(target, distances[low]) < distance(target, distances[low - 1]))
+	{
+		printf("NOT IN SET: low found %lld, for target: %lld\n", distances[low],target);
 		return low;
+	}
 	else
+	{
+		printf("NOT IN SET: low found %lld, for target: %lld\n", distances[low - 1],target);
 		return low - 1;
+	}
 
 }
 
@@ -128,31 +140,65 @@ bool isValid(long long a, long long b, long long c)
 
 long long linearRadiusFindValid(long long at, long long low, long long high)
 {
-	long long right = at;
-	long long left = at;
-	long long target = distances[low] + (distances[high] - distances[low]) / 2;
-	
-	while(low < left || right < high)
+	debug("linearRadiusFindValid");
+
+	if(isValid(low, at, high))
 	{
-		if(right < high && distance(distances[left], target) > distance(distances[right], target))
+		printf("BEST FOUND: %lld[%lld]\n", distances[at],IDs[at]);
+		return at;
+	}
+	long long right = at + 1;
+	long long left = at - 1;
+	long long target = distances[low] + ((distances[high] - distances[low]) + 1) / 2;
+
+	while(low < left && right < high)
+	{
+		if(distance(distances[left], target) > distance(distances[right], target))
 		{
 			if(isValid(low, right, high))
+			{
+				printf("BEST FOUND: %lld[%lld]\n", distances[right],IDs[right]);
 				return right;
+			}
 			right++;
 		}
 		else
 		{
 			if(isValid(low, left, high))
+			{	
+				printf("BEST FOUND: %lld[%lld]\n", distances[left],IDs[left]);
 				return left;
+			}
 			left--;
 		}
+	}
+	while(low < left)
+	{
+		if(isValid(low, left, high))
+		{
+			printf("BEST FOUND: %lld[%lld]\n", distances[left],IDs[left]);
+			return left;
+		}
+		left--;
+
+	}
+	while(right < high)
+	{
+		if(isValid(low, right, high))
+		{	
+			printf("BEST FOUND: %lld[%lld]\n", distances[right],IDs[right]);
+			return right;
+		}
+		right++;
 	}
 	return 0;
 }
 
 
 long long findMaxDistance()
-{ 
+{
+	printf("\n\n\n########################");
+	debug("findMaxDistance");
 	long long current_max = 0;
 	long long first_three[3];
 	long long last_three[3];
@@ -217,34 +263,88 @@ void testie()
 		printf("%lld", findMaxDistance());
 }
 
-void bruteforceCheck(long long a1[], long long a2[], int size, int min1, int max1) {
-    int min = 2147483647;
-    int max = 0;
+int bruteforceCheck(long long a1[], long long a2[], int size, long long min1, long long max1) 
+{
+
+	long long best_start = 0;
+	long long best_end = N -1;
+	long long best_mid = N /2;
+
+    long long minimum = 2147483647;
+    long long maximum = 0;
     for (int i = 0; i < size; i++) {
         for (int j = i + 1; j < size; j++) {
             for (int h = j + 1; h < size; h++) {
-                if (a1[i] != a1[j] && a1[h] != a1[j] && a1[i] != a1[h]) {
-                    max = max(max, min(a2[h] - a2[j], a2[j] - a2[i]));
-                    min = min(min, max(a2[h] - a2[j], a2[j] - a2[i]));
+                if (a1[i] != a1[j] && a1[h] != a1[j] && a1[i] != a1[h]) 
+				{
+					if(maximum < min(a2[h] - a2[j], a2[j] - a2[i]))
+					{
+						maximum = min(a2[h] - a2[j], a2[j] - a2[i]);
+						best_start = a2[h];
+						best_mid = a2[j];
+						best_end = a2[i];
+					}
+                    minimum = min(minimum, max(a2[h] - a2[j], a2[j] - a2[i]));
                 }
             }
         }
     }
-    if (min == 2147483647) {
-        min = 0;
-        max = 0;
+	if (minimum == 2147483647) 
+	{
+        minimum = 0;
+        maximum = 0;
     }
-    if (min != min1 || max != max1) printf("error");
+
+    if(minimum != min1 || maximum != max1) 
+	{
+		printf("VALID IS: %lld %lld, FOR %lld, %lld, %lld RECEIVED: %lld %lld\n", minimum, maximum, best_start, best_mid, best_end, min1, max1);
+		return 0;
+	}
+	else 
+		return 1;
 }
+
+bool existThreeDifferent()
+{
+
+		long long a = IDs[0];
+		long long b = 0;
+		long long c = 0;
+		long long i = 1;
+		while(b == 0 && i < N){
+			if(IDs[i] != a) 
+				b = IDs[i];
+			i++;
+		}
+		while(c == 0 && i < N){
+			if(IDs[i] != a && IDs[i] != b) 
+				c = IDs[i];
+			i++;
+		}
+		if(c == 0){
+			return false;
+		} 
+		return true;
+}
+
+void print()
+{
+	for(int i = 0; i < N; i++)
+	{
+		printf("%lld %lld\n", IDs[i], distances[i]);
+	}
+}
+
 
 int test() {
     int asd = 0;
     while (true) {
         asd++;
         int size = 30;
+		N = size;
         int networks = 4;
         int distance = 3;;
-        srand((int) time(NULL)+asd);
+        srand((unsigned int)(time(NULL)+asd));
         for (int i = 0; i < size; i++) {
             IDs[i] = rand() % networks + 1;
         }
@@ -253,15 +353,25 @@ int test() {
             distances[i] = distances[i - 1] + rand() % distance;
         }
 
-        //insert code here, min is left number in print, max is right
-        int min = findMinDistance();
-		int max = findMaxDistance();
+		//insert code here, min is left number in print, max is right
+		long long minimum = 0;
+		long long maximum = 0;
+		if(existThreeDifferent())
+		{
+			minimum = findMinDistance();
+			maximum = findMaxDistance();
+		}
 
        
-        bruteforceCheck(IDs, distances, size, min, max);
+     	if(bruteforceCheck(IDs, distances, size, minimum, maximum) == 0)
+		{
+			print();
+			break;
+		}
     }
     return 0;
 }
+
 
 int main()
 {

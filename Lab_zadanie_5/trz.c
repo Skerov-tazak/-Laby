@@ -1,4 +1,6 @@
 #include <assert.h>
+#include<stdlib.h>
+#include<time.h>
 #include<stdio.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -92,7 +94,7 @@ void findFirstThree(long long first_three[])
 
 long long binFindMiddle(long long low, long long high)
 {
-	long long target = distances[low] + (distances[high] - distances[low])/2;
+	long long target = distances[low] + (distances[high] - distances[low] + 1)/2;
 
 	while(low < high)
 	{
@@ -123,13 +125,17 @@ bool isValid(long long a, long long b, long long c)
 
 long long linearRadiusFindValid(long long at, long long low, long long high)
 {
-	long long right = at;
-	long long left = at;
-	long long target = distances[low] + (distances[high] - distances[low]) / 2;
-	
-	while(low < left || right < high)
+
+	if(isValid(low, at, high))
+		return at;
+
+	long long right = at + 1;
+	long long left = at - 1;
+	long long target = distances[low] + (distances[high] - distances[low] + 1) / 2;
+
+	while(low < left && right < high)
 	{
-		if(right < high && distance(distances[left], target) > distance(distances[right], target))
+		if(distance(distances[left], target) > distance(distances[right], target))
 		{
 			if(isValid(low, right, high))
 				return right;
@@ -141,6 +147,19 @@ long long linearRadiusFindValid(long long at, long long low, long long high)
 				return left;
 			left--;
 		}
+	}
+	while(low < left)
+	{
+		if(isValid(low, left, high))
+			return left;
+		left--;
+
+	}
+	while(right < high)
+	{
+		if(isValid(low, right, high))
+			return right;
+		right++;
 	}
 	return 0;
 }
@@ -179,26 +198,30 @@ long long findMaxDistance()
 bool existThreeDifferent()
 {
 
-		long long a = IDs[0];
-		long long b = 0;
-		long long c = 0;
-		long long i = 1;
-		while(b == 0 && i < N){
-			if(IDs[i] != a) 
-				b = IDs[i];
-			i++;
+		long long first = IDs[0];
+		long long second = 0;
+		long long third = 0;
+		long long index = 1;
+		
+		while(second == 0 && index < N)
+		{
+			if(IDs[index] != first) 
+				second = IDs[index];
+			index++;
 		}
-		while(c == 0 && i < N){
-			if(IDs[i] != a && IDs[i] != b) 
-				c = IDs[i];
-			i++;
+		while(third == 0 && index < N)
+		{
+			if(IDs[index] != first && IDs[index] != second) 
+				third = IDs[index];
+			index++;
 		}
-		if(c == 0){
-			printf("0 0");
+	
+		if(third == 0)
 			return false;
-		} 
-		return true;
+		else 
+			return true;
 }
+
 
 void testie()
 {
@@ -209,14 +232,16 @@ void testie()
 			(void)!scanf("%lld", IDs + i);
 			(void)!scanf("%lld", distances + i);
 		}
-		
 
 
 		if(existThreeDifferent()){
 			printf("%lld ", findMinDistance());		
 			printf("%lld", findMaxDistance());
 		}
+		else 
+			printf("0 0");
 }
+
 
 int main()
 {

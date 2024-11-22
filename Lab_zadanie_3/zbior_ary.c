@@ -159,7 +159,6 @@ zbior_ary suma(zbior_ary A, zbior_ary B) // calculates the sum of two zbior_ary
 					sum.size += 2;
 					B_index += 2;
 				}
-
 			}
 		}
 		else if(A_index < A.size && (B_index >= B.size || mod(A.sets[A_index]) < mod(B.sets[B_index]))) // if no more in B to process
