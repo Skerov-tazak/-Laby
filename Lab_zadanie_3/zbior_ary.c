@@ -5,6 +5,8 @@ static int Q; // Keep Q in global var
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
+extern void print(zbior_ary A);
+
 int mod(int a) // This modulo function retruns the positive remainder for all integers
 {
 	int mod = a % Q;
@@ -160,6 +162,44 @@ zbior_ary suma(zbior_ary A, zbior_ary B) // calculates the sum of two zbior_ary
 					B_index += 2;
 				}
 			}
+			else if(A.sets[A_index] == B.sets[B_index])
+			{
+				if(A.sets[A_index + 1] > B.sets[B_index + 1])
+				{
+					if(mod(B.sets[B_index]) == mod(sum.sets[i]) && B.sets[B_index] <= sum.sets[i + 1] + Q) // overlapping for B;
+					{
+						mergeOverlapIntervals(sum.sets, i, A.sets, A_index);
+						A_index += 2;
+						B_index += 2;
+					}
+					else 
+					{
+						i += 2;
+						copyInterval(sum.sets, i, A.sets, A_index);
+						sum.size += 2;
+						B_index += 2;
+						A_index += 2;
+					}
+
+				}
+				else 
+				{
+					if(mod(B.sets[B_index]) == mod(sum.sets[i]) && B.sets[B_index] <= sum.sets[i + 1] + Q) // overlapping for B;
+					{
+						mergeOverlapIntervals(sum.sets, i, B.sets, B_index);
+						B_index += 2;
+						A_index += 2;
+					}
+					else 
+					{
+						i += 2;
+						copyInterval(sum.sets, i, B.sets, B_index);
+						sum.size += 2;
+						B_index += 2;
+						A_index += 2;
+					}
+				}
+			}
 		}
 		else if(A_index < A.size && (B_index >= B.size || mod(A.sets[A_index]) < mod(B.sets[B_index]))) // if no more in B to process
 		{
@@ -230,6 +270,7 @@ zbior_ary iloczyn(zbior_ary A, zbior_ary B) // calculates the intersection of tw
 
 	while(A_index < A.size && B_index < B.size)
 	{
+
 		if(mod(A.sets[A_index]) == mod(B.sets[B_index]))
 		{
 			int intersect_begin = max(A.sets[A_index], B.sets[B_index]);
@@ -245,7 +286,7 @@ zbior_ary iloczyn(zbior_ary A, zbior_ary B) // calculates the intersection of tw
 				A_index += 2;
 				B_index += 2;
 			}
-			if(A.sets[A_index + 1] < B.sets[B_index + 1])
+			else if(A.sets[A_index + 1] < B.sets[B_index + 1])
 				A_index += 2;
 			else
 				B_index += 2;
