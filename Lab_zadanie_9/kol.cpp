@@ -1,4 +1,8 @@
 #include"kol.h"
+#include <cstddef>
+#include <cstdlib>
+#include <cstdio>
+#include <cstdlib>
 // Trzymamy informacje o końcu kolejki i o ilości członków kolejki do okienka w jej pierwszym node
 // Kazda kolejka jest w porzadku normalnym (mniejsze liczby blizej poczatku kolejki) 
 // lub w porzadku odwroconym - mniejsze liczby blizej konca kolejki. 
@@ -139,6 +143,13 @@ void zamkniecie_okienka(int k1, int k2)
 
 std::vector<interesant*> fast_track(interesant *i1, interesant *i2)
 {
+	if(i1 == i2)
+	{
+		link(i1->v1, i1, i1->v2);
+		link(i1->v2, i1, i1->v1);
+		return {i1};
+	}
+
 	interesant* right = i1->v1; // to sie tylko nazywa right, tak naprawde idzie w kierunku v1
 	interesant* left = i1->v2; // ten idzie w kierunku v2
 	interesant* prev_right = i1;
@@ -166,33 +177,19 @@ std::vector<interesant*> fast_track(interesant *i1, interesant *i2)
 		}
 	} // po ukonczeniu petli right == i2 lub left == i2	
 
-	if(right == i2)
+	if(right == i2) // poprawione w koncu linkowanie interesantow po usunieciu listy ze srodka
 	{
-		if(right->v1 == prev_right)
-		{
-			link(i1->v2, i1, right->v2);
-			link(i2->v2, i2, i1->v2);
-		}
-		else 
-		{
-			link(i1->v2, i1, right->v1);
-			link(i2->v1, i2, i1->v2);
-		}
+		link(i1->v2, i1, next(right,prev_right));
+		link(next(right, prev_right), i2, i1->v2);
+
 		right_vector.push_back(i2);
 		return right_vector;
 	}
 	else 
 	{
-		if(left->v1 == prev_left)
-		{
-			link(i1->v1, i1, left->v2);
-			link(i2->v2, i2, i1->v1);
-		}
-		else 
-		{
-			link(i1->v1, i1, left->v2);
-			link(i2->v2, i2, i1->v1);
-		}
+		link(i1->v1, i1, next(left, prev_left));
+		link(next(left,prev_left), i2, i1->v1);
+		
 		left_vector.push_back(i2);
 		return left_vector;
 	}
