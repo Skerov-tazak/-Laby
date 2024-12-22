@@ -1,9 +1,6 @@
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
 
 #include "kol.h"
+#include <cassert>
 
 int main() {
   otwarcie_urzedu(3);
@@ -54,6 +51,46 @@ int main() {
   // 0:  | 1:  | 2: i7, i4, i6
   interesant *i8 = nowy_interesant(0);
   // 0: i8  | 1:  | 2: i7, i4, i6
+  interesant *i9 = nowy_interesant(0);
+  // 0: i8 i9 | 1:  | 2: i7, i4, i6
+  interesant *i10 = nowy_interesant(0);
+  interesant *i11 = nowy_interesant(0);
+  interesant *i12 = nowy_interesant(0);
+  interesant *i13 = nowy_interesant(0);
+  interesant *i14 = nowy_interesant(0);
+  interesant *i15 = nowy_interesant(0);
+  interesant *i16 = nowy_interesant(0);
+  interesant *i17 = nowy_interesant(0);
+  interesant *i18 = nowy_interesant(0);
+  interesant *i19 = nowy_interesant(0);
+  interesant *i20 = nowy_interesant(0);
+  interesant *i21 = nowy_interesant(0);
+  interesant *i22 = nowy_interesant(0);
+  naczelnik(0);
+  printAll();
+  zmiana_okienka(i14, 1);
+  zmiana_okienka(i14, 1);
+  zmiana_okienka(i17, 1);
+  zmiana_okienka(i11, 1);
+  zmiana_okienka(i19, 1);
+  zmiana_okienka(i22, 1);
+  zmiana_okienka(i7, 1);
+  naczelnik(1);
+  interesant *i23 = nowy_interesant(1);
+  zamkniecie_okienka(1, 0);
+  printAll();
+  fast_track(i22, i18);
+  zmiana_okienka(i9, 2);
+  printAll();
+  naczelnik(2);
+  printAll();
+  zamkniecie_okienka(2, 0);
+  printAll();
+  naczelnik(0);
+  printAll();
+  obsluz(0);
+  printAll();
+  printAll();
   v = zamkniecie_urzedu();
   // 0:  | 1:  | 2:
   assert(v.size() == 4U);

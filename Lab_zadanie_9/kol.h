@@ -3,6 +3,14 @@
 
 #include<stdlib.h>
 #include <vector>
+#include<iostream>
+#include <cstddef>
+#include <cstdlib>
+#include <vector>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
 
 // Wszędzie w zadaniu można założyć, że wskaźniki przekazywane do funkcji są
 // wskaźnikami na struktury interesant, które były kiedyś wynikiem funkcji
@@ -15,9 +23,11 @@
 struct interesant {
     // Twój kod zaczyna się tu
 	int numerek;
-	interesant* right, *left;
+	interesant* v1, *v2;
     // A kończy tu
 };
+
+void printAll();
 
 /**
  * @brief Inicjuje bibliotekę
