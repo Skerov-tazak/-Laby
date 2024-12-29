@@ -1,12 +1,16 @@
 #include "kol.h"
+#include<stdlib.h>
+#include<stdio.h>
 extern void printAll();
+
+
 
 
 void printv(std::vector<interesant*> vect)
 {
 	printf("{ ");
 	for(int i = 0; i < vect.size(); i++)
-		printf("%d ", vect[i]->numerek);
+		printf("%d ", vect[i]->val);
 	printf("}\n");
 }
 
@@ -42,7 +46,7 @@ int main() {
 	naczelnik(0);
 	naczelnik(1);
 	printAll();
-	
+
 	zamkniecie_okienka(2, 1);
 	printAll();
 
@@ -50,20 +54,20 @@ int main() {
 	obsluz(0);
 	obsluz(0);
 	naczelnik(0);
-	printAll();
+//	printAll();
 
 	zmiana_okienka(i3, 1);
 	zmiana_okienka(i5, 1);
 	zmiana_okienka(i8, 1);
-	printAll();
+//	printAll();
 
 	naczelnik(1);
 	zmiana_okienka(i9, 1);
 	zmiana_okienka(i13, 1);
-	printAll();
+//	printAll();
 
 	zamkniecie_okienka(0, 1);
-	printAll();
+//	printAll();
 
 	printv(fast_track(i6, i12));
 	zmiana_okienka(i15, 3);
@@ -76,13 +80,12 @@ int main() {
 	zmiana_okienka(i16, 3);
 	zmiana_okienka(i17, 3);
 	zmiana_okienka(i14, 3);
-	printAll();
+//	printAll();
 	printv(fast_track(i8, i19));
-	printAll();
+//	printAll();
 	printv(fast_track(i16, i14));
-	printAll();
-	printv(fast_track(i15, i15));
-	printAll();
+//	printAll();
+//	printAll();
 	printv(zamkniecie_urzedu());
 
 }

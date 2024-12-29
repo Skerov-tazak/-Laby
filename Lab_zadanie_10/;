@@ -1,0 +1,126 @@
+#include "prev.h"
+#include<climits>
+#include <cstddef>
+#include <future>
+#include<memory>
+
+typedef struct
+{
+	int low;
+	int high;
+}interval;
+
+typedef struct treepathNode treepathNode;
+struct treepathNode
+{
+	interval interval;
+	int best_index;
+	std::shared_ptr<treepathNode> left;
+	std::shared_ptr<treepathNode> right;
+};
+
+typedef struct
+{
+	int value;
+	std::shared_ptr<treepathNode> path_start;
+}elem;
+
+std::vector<elem> trees;
+
+std::shared_ptr<treepathNode> genPath(int i, int x)
+{	
+
+	interval current_intrv = {INT_MIN, INT_MAX}; 
+	std::shared_ptr<treepathNode> mirror_node;
+	std::shared_ptr<treepathNode> begining, current;
+	begining = std::make_shared<treepathNode>(current_intrv, i, NULL, NULL);
+	current = begining;
+
+	if(i == 0) // sets the node on the previous tree, which will follow the current node;
+		mirror_node = NULL;
+	else 
+		mirror_node = trees[i - 1].path_start;
+
+	if(x < 0)
+	{
+		current_intrv = {INT_MIN, -1};
+		begining->left = current;
+		mirror_node = mirror_node->left;
+	}
+	else
+	{ 
+		current_intrv = {0, INT_MAX};
+		begining->right = current;
+		mirror_node = mirror_node->right;
+	}
+	current = std::make_shared<treepathNode>(current_intrv, i, NULL, NULL);
+	
+	while(current_intrv.high != current_intrv.low)
+	{
+		int mid = current_intrv.low - (current_intrv.low - current_intrv.high) / 2; // avoids overflows
+
+		if(x > mid)
+		{
+			interval new_intrv = {mid + 1, current_intrv.high};
+			std::shared_ptr<treepathNode> next_node = std::make_shared<treepathNode>(new_intrv, i, NULL, NULL);
+			current->right = next_node;
+
+			if(mirror_node != NULL)
+			{
+				current->left = mirror_node->left;
+				mirror_node = mirror_node->right;
+			}
+			current = next_node;
+		}
+		else 
+		{
+			interval new_intrv = {current_intrv.low, mid};
+			std::shared_ptr<treepathNode> next_node = std::make_shared<treepathNode>(new_intrv, i, NULL, NULL);
+			current->left = next_node;
+			current = next_node;
+
+			if(mirror_node != NULL)
+			{
+				current->right = mirror_node->right;
+				mirror_node = mirror_node->left;
+			}
+			current = next_node;
+		}
+	}
+
+	return begining;
+}
+
+
+void init(const std::vector<int> &seq)
+{
+	for(int i = 0; i < seq.size(); i++)
+	{
+
+	}
+
+}
+
+int prevInRange(int i, int lo, int hi)
+{
+
+}
+
+
+void pushBack(int value)
+{
+
+}
+
+void done()
+{
+
+}
+
+
+
+int main()
+{
+
+}
+
